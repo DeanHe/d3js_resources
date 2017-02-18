@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+    #svgContainer {
+        float: right;
+    }
+    .hovercard {
+        position: absolute;
+        max-width: 200px;
+        height: auto;
+        padding: 0 10px;
+        background-color: white;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+        font: 12px sans-serif;
+    }
+    /*add css for links*/
+    path.link {
+        fill: none;
+        stroke-width: 4px;
+    }    
+    path.link.fire {
+        stroke: #B42B51;    
+    }
+    path.link.earth {
+        stroke: #FEC64F;
+    }
+    path.link.metal {
+        stroke: #959595;
+    }
+    path.link.water {
+        stroke: #00658C;
+    }
+    path.link.wood {
+        stroke: #00B258;
+    }
+    /*add css for arrow marker*/
+    #arrow_fire {
+        fill: #B42B51;    
+    }
+    #arrow_earth {
+        fill: #FEC64F;
+    }
+    #arrow_metal {
+        fill: #959595;
+    }
+    #arrow_water {
+        fill: #00658C;
+    }
+    #arrow_wood {
+        fill: #00B258;
+    }
+    
+</style>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+<body>
+    <div id="svgContainer">
+    </div>
+    <script>
+// set a width and height for our SVG
+var width = 600,
+    height = 600;
+
+// Define the nodes to be drawn
+var nodes = [
+	{name: 'fire'}, 
+	{name: 'earth'}, 
+	{name: 'metal'},
+    {name: 'water'},
+    {name: 'wood'}
+];
+
+//add links arra
+//source and target are for indicies of nodes array
+var links = [
+    { source: 0, target: 2, control: 'fire', desc:'Fire can melt Metal' },
+    { source: 1, target: 3, control: 'earth', desc:'Earth can absorb Water'},
+    { source: 2, target: 4, control: 'metal', desc:'Metal can cut Wood' },
+    { source: 3, target: 0, control: 'water', desc:'Water can extinguish Fire' },
+    { source: 4, target: 1, control: 'wood', desc:'Wood can hold on Earth' }
+];
+
+// add a SVG to the body for our viz
+    var svg=d3.select('#svgContainer').append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('float', 'right');
+
+    // add hovercard
+    var hovercard = d3.select('#svgContainer').append('div')
+        .attr('class', 'hovercard')
+        .style('opacity', 0)
+        .style('width', 200);
+
+    // use the force
+    var force = d3.layout.force()
+        .size([width, height])
+        .nodes(d3.values(nodes))
+        .links(links)
+        .on("tick", tick)
+        .linkDistance(width/2) 
+        .start(); 
+
+// build the arrow.
+svg.append("svg:defs").selectAll("marker")
+    .data(force.links())      // Different link/path types can be defined here
+  .enter().append("svg:marker")    // This section adds in the arrows
+    .attr("id", function(d,i) { return "arrow_" + d["control"]; })
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 50) //play with these to adjust location
+    .attr("refY", -3.5)
+    .attr("markerWidth", 3)
+    .attr("markerHeight", 3)
+    .attr("orient", "auto")
+    .append("svg:path")
+    .attr("d", "M0,-5L10,0L0,5");
+
+// add the links and the arrows
+var path = svg.append("svg:g").selectAll("path")
+    .data(force.links())
+  .enter().append("svg:path")
+    .attr("class", "link")
+    .attr("marker-end", function(d) { return "url(#arrow_" + d["control"] + ")"; });  
+
+// setup node definition
+    var node = svg.selectAll('.node')
+        .data(force.nodes())
+        .enter().append('g')
+        .attr('class', 'node')
+        .call(force.drag);
+        
+    
+   node.append('image')
+        .attr('xlink:href', function (d) { return "img/"+d.name.toLowerCase()+".png"; })
+        .attr("x", function(d) { return -height / 12; })
+        .attr("y", function(d) { return -width / 12; })
+        .attr("height", height / 6)
+        .attr("width", width / 6);
+    
+function tick(e) {   
+    node.attr("transform", function(d) {
+            return "translate(" + d.x + "," + d.y + ")"; });
+
+    path.attr("d", function(d, i) {
+            
+            //setup the source and target points
+            var dx = d.target.x - d.source.x, 
+                dy = d.target.y - d.source.y,
+                
+                //calculate the curve with math!
+                dr = Math.sqrt(dx * dx + dy * dy);
+            
+            //return the path using SVG Path Mini-Language
+            return "M" +
+                d.source.x + "," +
+                d.source.y + "A" +
+                dr + "," + dr + " 0 0,1 " +
+                d.target.x + "," +
+                d.target.y;
+        });
+    
+    path.attr("class", function(d) { return "link "+d.control; });
+
+    path.on('mouseover', function(d) {       
+           hovercard.transition()
+                .duration(100)
+                .style('opacity', 1);
+                
+            var tip = 
+                '<h4>' + d['desc'] + '</h4>';
+                
+                
+            hovercard.html(tip)
+                .style('left', d3.event.pageX + 'px')
+                .style('top', d3.event.pageY + 'px');
+                
+            
+        });
+        
+        path.on('mouseout', function(d) {
+            
+            hovercard.transition()
+                .duration(100)
+                .style('opacity',0);
+        });
+}
+</script>
+</body>
