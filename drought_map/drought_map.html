@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="./css/dark.css" />
+<style>
+</style>
+<body>
+    <div id="gallery_select">
+        <select onchange="location = this.value;">
+            <option selected disabled>Gallery</option>
+            <option value="./resume_chart.html">Resume Visualizer</option>
+            <option value="./index.html">Home</option>
+        </select>
+    </div>
+    <div>
+        <h3>
+            US Drought Conditions by County, October 2016
+        </h3>
+        <p>
+            I build this heatmap by D3 with cartographic info from <a href="https://github.com/topojson/us-atlas" target="_blank">US topojson</a>. The drought data is pulled from a <a href="https://www.kaggle.com/us-drought-monitor/united-states-droughts-by-county" target="_blank">kaggle project</a>,  with my python data preprocessing script list in <a href="https://github.com/DeanHe/d3js_resources/tree/master/drought_map" target="_blank">Github</a>.
+        </p>
+    </div>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <!-- add scripts for queue and colorbrewer -->
+    <script src="https://d3js.org/queue.v1.min.js"></script>
+    <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+    <!-- <script src="js/colorbrewer.js"></script> -->
+    <script>
+
+        var width = 960,
+            height = 600,
+            centered;
+
+        var map_color = ['#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026'];
+        var color = d3.scale.quantize()
+                        .domain(d3.range(0, 11)) // 0 to 10
+                        .range(map_color);
+
+        var path = d3.geo.path().projection(null);
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        //add background for click
+        svg.append("rect")
+            .attr("class", "background")
+            .attr("width", width)
+            .attr("height", height)
+            .on("click", clicked);
+
+        // add hover board
+        var barTooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("width", 600);
+
+        var map_g = svg.append("g");
+
+        function loadJson(callback) {
+            d3.json("https://api.github.com/repos/DeanHe/d3js_resources/contents/drought_map/us.json", function (error, data) {
+                if (error) throw error;
+                var us = JSON.parse(window.atob(data.content));
+                callback(null, us);
+            });
+        }
+        function loadCsv(callback) {
+            d3.json("https://api.github.com/repos/DeanHe/d3js_resources/contents/drought_map/drought_combined.csv", function (error, data) {
+                if (error) throw error;
+                var droughtData = d3.csvParse(window.atob(data.content));
+                //map drought info for merge
+                var droughtInfoById = d3.map();
+                droughtData.forEach(function (d) {
+                    droughtInfoById.set(d.FIPS, d);
+                });
+                callback(null, droughtInfoById);
+            });
+        }
+        //use queue to load multiple files asynchronously
+        queue()
+                .defer(loadJson)
+                .defer(loadCsv)
+                .await(ready);
+
+        function ready(error, us, droughtInfoById) {
+            if (error) throw error;
+
+            //draw counties
+            map_g.attr("class", "counties")
+            .selectAll("path")
+                .data(topojson.feature(us, us.objects.counties).features)
+            .enter().append("path")
+                .attr("class", "county")
+                .attr("d", path)
+                .attr('stroke-width', 0.5)
+                .attr('stroke', '#fff')
+                //add color
+                .attr("fill", function (d) {
+                    var item = droughtInfoById.get(d.id);
+                    if (item) {
+                        return color(item.LEVEL * 2);
+                    } else {
+                        return '#fff';
+                    }
+                })
+                //add dynamic tooltip
+                .on("mouseover", function (d) {
+                    var item = droughtInfoById.get(d.id);
+                    if (!item) {
+                        return;
+                    }
+                    barTooltip.transition()
+                        .style("opacity", .7);
+
+                    var tip = "<h3>" + item.county + ', ' + item.state + "</h3>";
+                    var tip = tip + "<strong>Drought Severity: </strong>" + formatNum(item.LEVEL) + "<br/>";
+                    var tip = tip + "<h4>Geographic Area (square miles)</h4>";
+
+                    barTooltip.html(tip)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY) + "px");
+
+                    var areaInfo = [+item.ALAND_SQMI, +item.AWATER_SQMI]
+
+                    var margin = { top: 20, right: 30, bottom: 30, left: 40 },
+                        height = 60,
+                        width = 140;
+
+                    var x = d3.scale.ordinal()
+                        .rangeRoundBands([0, width], .1);
+
+                    var y = d3.scale.log()
+                        .base(10)
+                        .range([height, 0]);
+
+                    var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .orient("bottom");
+
+                    var numberFormat = d3.format("s");
+                    function logFormat(d) {
+                        var x = Math.log(d) / Math.log(10) + 1e-6;
+                        return Math.abs(x - Math.floor(x)) < .3 ? numberFormat(d) : "";
+                    }
+                    var yAxis = d3.svg.axis()
+                        .scale(y)
+                        .orient("left")
+                        .tickFormat(logFormat);
+
+
+                    var chart = barTooltip.append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                      .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    //make sure to filter to the current ID
+                    x.domain(["Land", "Water"]);
+                    y.domain([1, d3.max(areaInfo)]);
+
+                    chart.append("g")
+                        .attr("class", "x-axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis);
+
+                    chart.append("g")
+                        .attr("class", "y-axis")
+                        .call(yAxis);
+                    chart.selectAll("#barChart")
+                        .data(areaInfo)
+                        .enter().append("rect")
+                          .attr("class", "bar")
+                          .attr("x", function (d, i) {
+                              var position = x.range();
+                              return position[i];
+                          })
+                          .attr("y", function (d) { return y(d); })
+                          .attr("height", function (d) { return height - y(d); })
+                          .attr("width", x.rangeBand());
+
+                    chart.selectAll("text.barValue")
+                        .data(areaInfo)
+                        .enter().append("text")
+                        .attr("class", "barValue")
+                        .attr("text-anchor", "middle")
+                        .attr("x", function (d, i) {
+                              var position = x.range();
+                              return position[i] + x.rangeBand() / 2;
+                          })
+                          .attr("y", function (d) { return y(d) - 5; })
+                         .text(function(d) { return d3.format(".1f")(d); });
+
+                })
+                .on("mouseout", function (d) {
+                    barTooltip.transition()
+                            .style("opacity", 0);
+                })
+                .on("click", clicked);
+
+            //add states overlay
+            map_g.append("path")
+                .datum(topojson.mesh(us, us.objects.states, function (a, b) { return a !== b; }))
+                .attr("class", "states")
+                .attr('stroke-width', 1.5)
+                .attr("d", path);
+
+            //add legend
+            var legend_scale = d3.scale.linear()
+                        .domain([1, 10])
+                        .rangeRound([600, 860]);
+
+            var legend_g = svg.append("g")
+                                .attr("class", "key")
+                                .attr("transform", "translate(0,40)");
+
+            legend_g.selectAll("rect")
+              .data(color.range().map(function (d) {
+                  d = color.invertExtent(d);
+                  if (d[0] == null) d[0] = legend_scale.domain()[0];
+                  if (d[1] == null) d[1] = legend_scale.domain()[1];
+                  return d;
+              }))
+              .enter().append("rect")
+                .attr("height", 8)
+                .attr("x", function (d) { return legend_scale(d[0]); })
+                .attr("width", function (d) { return legend_scale(d[1]) - legend_scale(d[0]); })
+                .attr("fill", function (d) { return color(d[0]); });
+
+            legend_g.append("text")
+                .attr("class", "caption")
+                .attr("x", legend_scale.range()[0])
+                .attr("y", -6)
+                .attr("fill", "#000")
+                .attr("text-anchor", "start")
+                .attr("font-weight", "bold")
+                .text("drought severity");
+
+            legend_g.call(d3.svg.axis().scale(legend_scale).orient("bottom")
+                .tickSize(12)
+                .tickFormat(function (x, i) { return i ? x + "0%" : x; })
+                .tickValues(color.domain()))
+              .select(".domain")
+                .remove();
+        }
+
+        function clicked(d) {
+            var x, y, k;
+            if (d && centered !== d) {
+                var centroid = path.centroid(d);
+                x = centroid[0];
+                y = centroid[1];
+                k = 4;
+                centered = d;
+            } else {
+                x = width / 2;
+                y = height / 2;
+                k = 1;
+                centered = null;
+            }
+
+            map_g.selectAll("path")
+                .classed("active", centered && function (d) { return d === centered; });
+
+            map_g.transition()
+                .duration(750)
+                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")");
+        }
+
+        function formatNum(val) {
+            val = val * 20;
+            var f = d3.format(".1f");
+            return f(val) + "%";
+        }
+
+        d3.select(self.frameElement).style("height", height + "px");
+
+    </script>
+</body>
