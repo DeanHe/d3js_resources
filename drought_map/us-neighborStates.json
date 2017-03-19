@@ -5,307 +5,307 @@
       "id": "01",
       "name": "Alabama",
       "abbr": "AL",
-      "neighborState":["FL","GA","MS","TN"]
+      "neighborState":["12","13","28","47"]
     },
     {
       "id": "02",
       "name": "Alaska",
       "abbr": "AK",
-      "neighborState":["WA"]
+      "neighborState":["53"]
     },
     {
       "id": "04",
       "name": "Arizona",
       "abbr": "AZ",
-      "neighborState":["CA","CO","NM","NV","UT"]
+      "neighborState":["06","08","35","32","49"]
     },
     {
       "id": "05",
       "name": "Arkansas",
       "abbr": "AR",
-      "neighborState":["LA","MO","MS","OK","TN","TX"]
+      "neighborState":["22","29","28","40","47","48"]
     },
     {
       "id": "06",
       "name": "California",
       "abbr": "CA",
-      "neighborState":["NV","OR","AZ","HI"]
+      "neighborState":["32","41","04","15"]
     },
     {
       "id": "08",
       "name": "Colorado",
       "abbr": "CO",
-      "neighborState":["WY","NE","KS","OK","NM","AZ","UT"]
+      "neighborState":["56","31","20","40","35","04","49"]
     },
     {
       "id": "09",
       "name": "Connecticut",
       "abbr": "CT",
-      "neighborState":["MA","RI","NY"]
+      "neighborState":["25","44","36"]
     },
     {
       "id": "10",
       "name": "Delaware",
       "abbr": "DE",
-      "neighborState":["PA","NJ","MD"]
+      "neighborState":["42","34","24"]
     },
     {
       "id": "11",
       "name": "District of Columbia",
       "abbr": "DC",
-      "neighborState":["MD","VA"]
+      "neighborState":["24","51"]
     },
     {
       "id": "12",
       "name": "Florida",
       "abbr": "FL",
-      "neighborState":["GA","AL"]
+      "neighborState":["13","01"]
     },
     {
       "id": "13",
       "name": "Georgia",
       "abbr": "GA",
-      "neighborState":["NC","SC","FL","AL","TN"]
+      "neighborState":["37","45","12","01","47"]
     },
     {
       "id": "15",
       "name": "Hawaii",
       "abbr": "HI",
-      "neighborState":["CA"]
+      "neighborState":["06"]
     },
     {
       "id": "16",
       "name": "Idaho",
       "abbr": "ID",
-      "neighborState":["MT","WY","UT","NV","OR","WA"]
+      "neighborState":["30","56","49","32","41","53"]
     },
     {
       "id": "17",
       "name": "Illinois",
       "abbr": "IL",
-      "neighborState":["WI","IN","KY","MO","IA"]
+      "neighborState":["55","18","21","29","19"]
     },
     {
       "id": "18",
       "name": "Indiana",
       "abbr": "IN",
-      "neighborState":["NI","OH","KY","IL"]      
+      "neighborState":["NI","39","21","17"]      
     },
     {
       "id": "19",
       "name": "Iowa",
       "abbr": "IA",
-      "neighborState":["MN","WI","IL","MO","NE","SD"]
+      "neighborState":["27","55","17","29","31","46"]
     },
     {
       "id": "20",
       "name": "Kansas",
       "abbr": "KS",
-      "neighborState":["NE","MO","OK","CO"]
+      "neighborState":["31","29","40","08"]
     },
     {
       "id": "21",
       "name": "Kentucky",
       "abbr": "KY",
-      "neighborState":["OH","WV","VA","TN","MO","IL","IN"]
+      "neighborState":["39","54","51","47","29","17","18"]
     },
     {
       "id": "22",
       "name": "Louisiana",
       "abbr": "LA",
-      "neighborState":["AR","MS","TX"]
+      "neighborState":["05","28","48"]
     },
     {
       "id": "23",
       "name": "Maine",
       "abbr": "ME",
-      "neighborState":["NH"]
+      "neighborState":["33"]
     },
     {
       "id": "24",
       "name": "Maryland",
       "abbr": "MD",
-      "neighborState":["PA","DE","DC","VA","WV"]
+      "neighborState":["42","10","11","51","54"]
     },
     {
       "id": "25",
       "name": "Massachusetts",
       "abbr": "MA",
-      "neighborState":["NH","RI","CT","NY","VT"]
+      "neighborState":["33","44","09","36","50"]
     },
     {
       "id": "26",
       "name": "Michigan",
       "abbr": "MI",
-      "neighborState":["OH","IN","WI"]
+      "neighborState":["39","18","55"]
     },
     {
       "id": "27",
       "name": "Minnesota",
       "abbr": "MN",
-      "neighborState":["WI","IA","SD","ND"]
+      "neighborState":["55","19","46","38"]
     },
     {
       "id": "28",
       "name": "Mississippi",
       "abbr": "MS",
-      "neighborState":["TN","AL","LA","AR"]
+      "neighborState":["47","01","22","05"]
     },
     {
       "id": "29",
       "name": "Missouri",
       "abbr": "MO",
-      "neighborState":["IA","IL","KY","TN","AR","OK","KS","NE"]
+      "neighborState":["19","17","21","47","05","40","20","31"]
     },
     {
       "id": "30",
       "name": "Montana",
       "abbr": "MT",
-      "neighborState":["ND","SD","WY","ID"]
+      "neighborState":["38","46","56","16"]
     },
     {
       "id": "31",
       "name": "Nebraska",
       "abbr": "NE",
-      "neighborState":["SD","IA","MO","KS","CO","WY"]
+      "neighborState":["46","19","29","20","08","56"]
     },
     {
       "id": "32",
       "name": "Nevada",
       "abbr": "NV",
-      "neighborState":["ID","UT","AZ","CA","OR"]
+      "neighborState":["16","49","04","06","41"]
     },
     {
       "id": "33",
       "name": "New Hampshire",
       "abbr": "NH",
-      "neighborState":["ME","MA","VT"]
+      "neighborState":["23","25","50"]
     },
     {
       "id": "34",
       "name": "New Jersey",
       "abbr": "NJ",
-      "neighborState":["NY","DE","PA"]
+      "neighborState":["36","10","42"]
     },
     {
       "id": "35",
       "name": "New Mexico",
       "abbr": "NM",
-      "neighborState":["CO","OK","TX","AZ","UT"]
+      "neighborState":["08","40","48","04","49"]
     },
     {
       "id": "36",
       "name": "New York",
       "abbr": "NY",
-      "neighborState":["VT","MA","CT","NJ","PA"]
+      "neighborState":["50","25","09","34","42"]
     },
     {
       "id": "37",
       "name": "North Carolina",
       "abbr": "NC",
-      "neighborState":["VA","SC","GA","TN"]
+      "neighborState":["51","45","13","47"]
     },
     {
       "id": "38",
       "name": "North Dakota",
       "abbr": "ND",
-      "neighborState":["MN","SD","MT"]
+      "neighborState":["27","46","30"]
     },
     {
       "id": "39",
       "name": "Ohio",
       "abbr": "OH",
-      "neighborState":["PA","WV","KY","IN","MI"]
+      "neighborState":["42","54","21","18","26"]
     },
     {
       "id": "40",
       "name": "Oklahoma",
       "abbr": "OK",
-      "neighborState":["KS","MO","AR","TX","NM","CO"]
+      "neighborState":["20","29","05","48","35","08"]
     },
     {
       "id": "41",
       "name": "Oregon",
       "abbr": "OR",
-      "neighborState":["WA","ID","NV","CA"]
+      "neighborState":["53","16","32","06"]
     },
     {
       "id": "42",
       "name": "Pennsylvania",
       "abbr": "PA",
-      "neighborState":["NY","NJ","DE","MD","WV","OH"]
+      "neighborState":["36","34","10","24","54","39"]
     },
     {
       "id": "44",
       "name": "Rhode Island",
       "abbr": "RI",
-      "neighborState":["MA","CT"]
+      "neighborState":["25","09"]
     },
     {
       "id": "45",
       "name": "South Carolina",
       "abbr": "SC",
-      "neighborState":["NC","GA"]
+      "neighborState":["37","13"]
     },
     {
       "id": "46",
       "name": "South Dakota",
       "abbr": "SD",
-      "neighborState":["ND","MN","IA","NE","WY","MT"]
+      "neighborState":["38","27","19","31","56","30"]
     },
     {
       "id": "47",
       "name": "Tennessee",
       "abbr": "TN",
-      "neighborState":["KY","VA","NC","GA","AL","MS","AR","MO"]
+      "neighborState":["21","51","37","13","01","28","05","29"]
     },
     {
       "id": "48",
       "name": "Texas",
       "abbr": "TX",
-      "neighborState":["OK","AR","LA","NM"]
+      "neighborState":["40","05","22","35"]
     },
     {
       "id": "49",
       "name": "Utah",
       "abbr": "UT",
-      "neighborState":["ID","WY","CO","NM","AZ","NV"]      
+      "neighborState":["16","56","08","35","04","32"]      
     },
     {
       "id": "50",
       "name": "Vermont",
       "abbr": "VT",
-      "neighborState":["NH","MA","NY"]
+      "neighborState":["33","25","36"]
     },
     {
       "id": "51",
       "name": "Virginia",
       "abbr": "VA",
-      "neighborState":["MD","DC","NC","TN","KY","WV"]
+      "neighborState":["24","11","37","47","21","54"]
     },
     {
       "id": "53",
       "name": "Washington",
       "abbr": "WA",
-      "neighborState":["AK","ID","OR"]
+      "neighborState":["02","16","41"]
     },
     {
       "id": "54",
       "name": "West Virginia",
       "abbr": "WV",
-      "neighborState":["PA","MD","VA","KY","OH"]
+      "neighborState":["42","24","51","21","39"]
     },
     {
       "id": "55",
       "name": "Wisconsin",
       "abbr": "WI",
-      "neighborState":["MI","IL","IA","MN"]
+      "neighborState":["26","17","19","27"]
     },
     {
       "id": "56",
       "name": "Wyoming",
       "abbr": "WY",
-      "neighborState":["MT","SD","NE","CO","UT","ID"]
+      "neighborState":["30","46","31","08","49","16"]
     }
   ]
 }
