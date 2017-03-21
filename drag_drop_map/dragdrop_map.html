@@ -1,0 +1,339 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+#container {
+  margin:10px 10%;
+  padding:20px;
+  border:2px solid #d0d0d0;
+  border-radius: 5px;
+  height:100%;
+  clear:both;
+}
+#comment {
+   margin:10px 10%; 
+}
+#score{
+  float:right;
+  padding:4px 0;
+  font-weight:bold;
+}
+#info{
+  float:left;
+  font-weight:bold;
+  padding:4px 0;
+  width:80%;
+}
+#top{
+  margin:10px 10%;
+}
+.currentState{
+  display:none;
+  fill:#316395;  /*deep blue*/
+  stroke:#316395;
+}
+.states {
+    fill: none;
+    stroke: #fff;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    pointer-events: none;
+}
+.allStates{
+  fill:#ddd;
+  stroke:#fff;
+}
+.correct {
+  fill:#66aa00; /*red*/
+}
+.error{
+  fill:#dc3912; /*green*/
+}
+.fill {
+  fill: #fff;
+}
+#score {
+  color:#990099; /*purple*/
+}
+#info {
+  color:#ff9900;  /*orange*/
+}
+#top .start{
+  position: absolute;
+  background: rgba(255,255,255,0.3);
+  width: auto;
+  padding: 4px 10px;
+  text-align: center;
+  font-size: 140%;
+}
+#gallery_select{
+   position:absolute;
+   top: 20px;
+   right:20px;
+}
+.grabbable {
+    cursor: move; /* fallback if grab cursor is unsupported */
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+
+ /* (Optional) Apply a "closed-hand" cursor during drag operation. */
+.grabbing{ 
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+}
+</style>
+<body>
+    <div id="gallery_select">
+        <select onchange="location = this.value;">
+            <option selected disabled>Gallery</option>
+            <option value="./resume_chart.html">Resume Visualizer</option>
+            <option value="./drought_map.html">Drought Map</option>
+            <option value="./index.html">Home</option>
+        </select>
+    </div>
+    <div id="top">
+        <h3>
+            Drag and Drop US state Game with D3.js
+        </h3>
+        <div id="info">Loading...</div>
+        <div id="score"></div>
+        <div class="clear"></div>
+    </div>
+    <div id="container"></div>
+    <p id="comment">
+        A geography game inspired by <a href="http://techslides.com/geography-game-with-d3" target="_blank">techslides</a> where player needs to drag and drop US states into their place on a map. 
+        I used US topojson and created a neighboring states json for the data source. Added grabbing cursor, show-up effect, state name alignment to the game. Source code is <a href="https://github.com/DeanHe/d3js_resources/tree/master/drought_map" target="_blank">here</a>.
+    </p>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <!-- add scripts for queue and colorbrewer -->
+    <script src="https://d3js.org/queue.v1.min.js"></script>
+    <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+    <!-- <script src="js/colorbrewer.js"></script> -->
+    <script>
+
+        var width = 960,
+            height = 600;
+
+        var path = d3.geo.path().projection(null);
+
+        var topo_states, all, stateInfoById, tries = 0, score = 0;
+        var drag = d3.behavior.drag()
+                .on("drag", dragmove)
+                .on("dragstart", dragstart)
+                .on("dragend", dragend);
+
+        var svg = d3.select("#container").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        var map_g = svg.append("g");
+
+        function loadMapJson(callback) {
+            d3.json("https://api.github.com/repos/DeanHe/d3js_resources/contents/drought_map/us.json", function (error, data) {
+                if (error) throw error;
+                var us = JSON.parse(window.atob(data.content));
+                callback(null, us);
+            });
+        }
+        function loadNeighborStatesJson(callback) {
+            d3.json("https://api.github.com/repos/DeanHe/d3js_resources/contents/drought_map/us-neighborStates.json", function (error, data) {
+                if (error) throw error;
+                var data = JSON.parse(window.atob(data.content));
+                //map drought info for merge
+                stateInfoById = d3.map();
+                data.features.forEach(function (d) {
+                    stateInfoById.set(d.id, d);
+                });              
+                callback(null, stateInfoById);
+            });
+        }
+        //use queue to load multiple files asynchronously
+        queue()
+                .defer(loadMapJson)
+                .defer(loadNeighborStatesJson)
+                .await(ready);
+
+        function ready(error, us, stateInfoById) {
+            if (error) throw error;
+            //draw states
+            map_g.append("path")
+                .datum(topojson.feature(us, us.objects.states))
+                .attr("class", "allStates")
+                .attr("d", path)
+                .attr('stroke-width', 0.5)
+                .attr('stroke', '#fff')
+                //add color
+                .attr("fill", "blue");
+
+            //add states overlay
+            map_g.append("path")
+                .datum(topojson.mesh(us, us.objects.states, function (a, b) { return a !== b; }))
+                .attr("class", "states")
+                .attr('stroke-width', 1.5)
+                .attr("d", path);
+
+            topo_states = topojson.feature(us, us.objects.states).features;
+            d3.shuffle(topo_states);
+            var current_state = map_g.selectAll(".currentState").data(topo_states);
+
+            current_state.enter().insert("path")
+                .attr("class", "currentState")
+                .attr("d", path)
+                .attr("id", function (d, i) { return 'b'+ d.id; })
+                .attr("state_name", function (d, i) {
+                    var item = stateInfoById.get(d.id);
+                    return item.name;
+                })
+                .style("stroke", "#111")
+                .attr("transform", function (d, i) {
+                    var cx = Number(-1 * path.centroid(d)[0] + width / 2);
+                    var cy = Number(-1 * path.centroid(d)[1] + height / 2);
+                    var coord = [cx, cy];
+                    return "translate(" + coord + ")";
+                })
+                .attr("x", function (d, i) {
+                    var cx = Number(-1 * path.centroid(d)[0] + width / 2);
+                    return cx;
+                })
+                .attr("y", function (d, i) {
+                    var cy = Number(-1 * path.centroid(d)[1] + height / 2);
+                    return cy;
+                })
+                .call(drag);
+
+            //all used to keep track
+            all = d3.selectAll(".currentState")[0];
+            d3.select("#info").text("USA Map");
+
+            //start
+            go();
+        }
+        function go() {
+            d3.select("#info").attr("class", "start");
+            var missed = topo_states.length - all.length - score;
+            d3.select("#score").text("Score: " + score + "/" + topo_states.length + " | Missed: " + missed);
+
+            if (all.length > 0) {
+                var obj = d3.select(all.shift());
+                obj.style("display", "block")
+                    .classed("grabbable", true)
+                    .attr('opacity', 0)
+		            .transition()
+		            .duration(800)
+                    .attr('opacity', 1);
+
+                //d3.select("#info").text(obj.attr("state_name"));
+                var element_loc = obj[0][0].getBoundingClientRect();
+                d3.select("#info")
+                    .style("top", (element_loc.top - 30) + "px")
+                    .style("left", element_loc.left + "px")
+                    .text(obj.attr("state_name"));
+                window.setTimeout(function () {
+                    d3.select("#info").classed("start", false);
+                }, 1200);
+            } else {
+                d3.select("#info").text("Finished. Refresh page to play again.");
+                d3.select(".allStates").transition().duration(1500).style("fill", function () {
+                    return "#666";
+                });
+            }
+
+        }
+        function dragstart(d) {
+
+            //d3.event.sourceEvent.stopPropagation(); // silence other listeners
+            d.x = Number(d3.select(this).attr("x"));
+            d.y = Number(d3.select(this).attr("y"));
+            if (d3.select(this).classed("grabbable")) {
+                d3.select(this).classed("grabbing", true)
+                            .classed("grabbable", false);
+            }
+        }
+
+        function dragmove(d) {
+            //only if its new country
+            console.log("start");
+            if (d3.select('#b' + d.id).attr("class").includes("currentState")) {
+                d.x += d3.event.dx;
+                console.log(d3.event.dx);
+                d.y += d3.event.dy;
+
+                d3.select(this).attr("transform", function (d, i) {
+                    return "translate(" + [d.x, d.y] + ")"
+                });
+            }
+        }
+
+
+        function dragend(d) {
+            d3.select(this).classed("grabbing", false);
+            //only if its new country
+            if (d3.select('#b' + d.id).attr("class").includes("currentState")) {
+
+                //snap to position if you are 10 pixels or closer
+                if (d.x > -10 && d.x < 10 && d.y > -10 && d.y < 10) {
+                    d3.select(this).attr("class", "correct").attr("transform", function (d, i) {
+                        return "translate(0,0)";
+                    });
+                    score++;
+                    tries = 0;
+
+                    //go to next!
+                    go();
+
+                } else if (path.area(d) < 100 && (d.x > -30 && d.x < 30 && d.y > -30 && d.y < 30)) {
+                    //handle for small area state, made it more tolerable
+                    d3.select(this).attr("class", "correct").attr("transform", function (d, i) {
+                        return "translate(0,0)";
+                    });
+                    score++;
+                    tries = 0;
+
+                    //go to next!
+                    go();
+                } else {
+
+                    //wrong
+                    tries++;
+                    if (tries == 1) {
+                        var neighbor_ids = stateInfoById.get(d.id).neighborState;
+                        var neighbors_txt = "Neighboring States: ";
+                        for (var iter in neighbor_ids) {
+                            neighbors_txt += stateInfoById.get(neighbor_ids[iter]).name + ", ";
+                        }
+                        neighbors_txt = neighbors_txt.substring(0, neighbors_txt.length - 2);
+                        d3.select("#info").text(neighbors_txt);
+
+                        //put back in the middle!
+                        var cx = Number(-1 * path.centroid(d)[0] + width / 2);
+                        var cy = Number(-1 * path.centroid(d)[1] + height / 2);
+                        var coord = [cx, cy];
+
+                        d3.select(this).transition().duration(500).attr("transform", function (d, i) {
+                            return "translate(" + coord + ")"
+                        })
+                        d3.select(this).classed("grabbable", true);
+
+                    } else {
+                        //wrong again, move element to correct position and mark red!
+                        tries = 0;
+                        d3.select(this).transition().duration(500).attr("class", "error").attr("transform", function (d, i) {
+                            return "translate(0,0)";
+                        });
+
+                        //go to next!
+                        go();
+                    }
+
+                }
+
+            }
+
+        }
+
+
+    </script>
+</body>
