@@ -104,7 +104,7 @@
     <div id="container"></div>
     <p id="comment">
         A geography game inspired by <a href="http://techslides.com/geography-game-with-d3" target="_blank">techslides</a> where player needs to drag and drop US states into their place on a map. 
-        I used US topojson and created a neighboring states json for the data source. Added grabbing cursor, show-up effect, state name alignment to the game. Source code is <a href="https://github.com/DeanHe/d3js_resources/tree/master/drought_map" target="_blank">here</a>.
+        I used US topojson and created a neighboring states json for the data source. Added grabbing cursor, show-up effect, state name alignment to the game. Source code is <a href="https://github.com/DeanHe/d3js_resources/tree/master/drag_drop_map" target="_blank">here</a>.
     </p>
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script src="https://d3js.org/topojson.v1.min.js"></script>
@@ -139,7 +139,7 @@
             });
         }
         function loadNeighborStatesJson(callback) {
-            d3.json("https://api.github.com/repos/DeanHe/d3js_resources/contents/drought_map/us-neighborStates.json", function (error, data) {
+            d3.json("https://api.github.com/repos/DeanHe/d3js_resources/contents/drag_drop_map/us-NeighborStates.json", function (error, data) {
                 if (error) throw error;
                 var data = JSON.parse(window.atob(data.content));
                 //map drought info for merge
